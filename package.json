@@ -1,0 +1,32 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "1 - instalar mongoDB (versão mais atualizada)\r 2 - instalar postman (versão mais atualizada)\r 3 - abrir o vscode e abrir o terminal na pasta do projeto\r 4 - utilizar o comando \"npm init -y\"\r 5 - instalar as bibliotecas com o comando \"npm install bcrypt cookie-parser cors express jsonwebtoken mongoose multer nodemon\"\r 6 - usar o comando \"npm run start\" toda vez que for começar a codar",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./index.js localhost 5000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.1.0",
+    "multer": "^1.4.4",
+    "nodemon": "^2.0.15",
+    "path": "^0.12.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StanleySenne/Projeto_TFG_cachaca.git"
+  },
+  "bugs": {
+    "url": "https://github.com/StanleySenne/Projeto_TFG_cachaca/issues"
+  },
+  "homepage": "https://github.com/StanleySenne/Projeto_TFG_cachaca#readme"
+}
