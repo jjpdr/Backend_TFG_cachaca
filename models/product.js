@@ -1,31 +1,31 @@
 const mongoose = require("../db/conn");
 const { Schema } = mongoose;
 
-const marca = mongoose.model(
-    "marca",
+const product = mongoose.model(
+    "product",
     new Schema(
         {
-            nome: {
+            name: {
                 type: String,
                 required: true,
             },
-            marca_produto: {
+            brand: {
                 type: String,
                 required: true,
             },
-            categoria: {
+            category: {
                 type: String,
             },
-            descricao: {
+            description: {
                 type: String,
             },
-            fabricante: {
+            manufacturer: {
                 type: String,
             },
-            caracteristica: {
+            info: {
                 type: String,
             },
-            preco: {
+            price: {
                 type: Number,
                 required: true,
             },
@@ -37,10 +37,9 @@ const marca = mongoose.model(
                 default: true,
             },
             user: Object,
-            adopter: Object,
         },
         { timestamps: true }
     )
 );
 
-module.exports = marca;
+module.exports = product;

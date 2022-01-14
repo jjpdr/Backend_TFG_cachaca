@@ -15,9 +15,9 @@ app.use(express.static("public"));
 // Routes
 
 const UserRoutes = require("./routes/UserRoutes");
-const MarcaRoutes = require("./routes/MarcaRoutes");
+const ProductRoutes = require("./routes/ProductRoutes");
 
 app.use("/users", UserRoutes);
-app.use("/marcas", MarcaRoutes);
+app.use("/products", ProductRoutes);
 
 app.listen(5000);
