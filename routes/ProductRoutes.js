@@ -5,7 +5,12 @@ const ProductController = require("../controllers/ProductController");
 const verifyToken = require("../helpers/verify-token");
 const { imageUpload } = require("../helpers/image-upload");
 
-router.post("/create", verifyToken, ProductController.create);
+router.post(
+    "/create",
+    verifyToken,
+    imageUpload.single("images"),
+    ProductController.create
+);
 
 router.get("/", ProductController.getAll);
 router.get("/meusProdutos", ProductController.getAllUserProducts);

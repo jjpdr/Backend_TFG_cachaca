@@ -13,6 +13,7 @@ module.exports = class ProductController {
     static async create(req, res) {
         const token = getToken(req);
         const user = await getUserByToken(token);
+        const { filename } = req.file;
 
         const {
             name,
@@ -33,8 +34,7 @@ module.exports = class ProductController {
             manufacturer,
             info,
             price,
-            available,
-            images,
+            image: filename,
             user: {
                 _id: user._id,
                 image: user.image,

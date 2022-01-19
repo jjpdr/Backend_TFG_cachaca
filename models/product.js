@@ -29,8 +29,8 @@ const product = mongoose.model(
                 type: Number,
                 required: true,
             },
-            images: {
-                type: Array,
+            image: {
+                type: String,
             },
             available: {
                 type: Boolean,
