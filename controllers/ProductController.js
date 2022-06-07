@@ -20,11 +20,21 @@ module.exports = class ProductController {
 
     const { filename } = req.file;
 
-    const { name, brand, category, description, manufacturer, info, price } =
-      req.body;
+    const {
+      name,
+      brand,
+      category,
+      description,
+      manufacturer,
+      info,
+      price,
+      quantity,
+    } = req.body;
 
-    if (!name || !brand || !price) {
-      res.status(401).json({ message: "Nome, preço ou marca faltando" });
+    if (!name || !brand || !price || !quantity) {
+      res
+        .status(401)
+        .json({ message: "Nome, preço, quantidade ou marca faltando" });
       return;
     }
 
@@ -37,6 +47,7 @@ module.exports = class ProductController {
       manufacturer,
       info,
       price,
+      quantity,
       image: filename,
     });
 
