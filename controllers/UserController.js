@@ -137,10 +137,9 @@ module.exports = class UserController {
     const id = req.params.id;
 
     //check if user exists
-    const token = getToken(req);
-    const user = await getUserByToken(token);
+    const user = await User.findById(id);
 
-    const { name, email, cpf, date, password, confirmPassword } = req.body;
+    const { name, email, cpf, birthday } = req.body;
 
     if (req.file) {
       user.image = req.file.filename;
@@ -159,24 +158,14 @@ module.exports = class UserController {
       return;
     }
 
+    user.name = name;
+
     user.email = email;
 
     user.cpf = cpf;
 
     user.birthday = birthday;
 
-    if (password !== confirmPassword) {
-      res.status(422).json({
-        message: "As senhas não conferem!",
-      });
-      return;
-    } else if (password === confirmPassword && password !== null) {
-      // creating password
-      const salt = await bcrypt.genSalt(12);
-      const passwordHash = await bcrypt.hash(password, salt);
-
-      user.password = passwordHash;
-    }
     try {
       //returns user updated data
       await User.findOneAndUpdate(
