@@ -11,10 +11,11 @@ router.get("/checkuser", UserController.checkUser);
 router.get("/:id", UserController.getUserById);
 router.get("/email/:email", UserController.getUserByEmail);
 router.patch(
-    "/edit/:id",
-    verifyToken,
-    imageUpload.single("image"),
-    UserController.editUser
+  "/edit/:id",
+  verifyToken,
+  imageUpload.single("image"),
+  UserController.editUser
 );
+router.post("/payment-method/:id", UserController.addPaymentMethod);
 
 module.exports = router;

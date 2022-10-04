@@ -37,6 +37,22 @@ const User = mongoose.model(
         enum: ["FREE", "MEDIUM", "PREMIUM"],
         default: "FREE",
       },
+      address: {
+        street: String,
+        city: String,
+        country: String,
+        phone: String,
+        zipCode: String,
+        state: String,
+      },
+      paymentMethod: [
+        {
+          number: String,
+          cvc: String,
+          expiry: String,
+          name: String,
+        },
+      ],
     },
     { timestamps: true }
   )

@@ -181,4 +181,32 @@ module.exports = class UserController {
       return;
     }
   }
+
+  static async addPaymentMethod(req, res) {
+    try {
+      const id = req.params.id;
+
+      const { name, number, cvc, expiry } = req.body;
+
+      const user = await User.findOne({ _id: id });
+
+      if (!user) {
+        res.status(404).json({ message: "Usuário não encontrado!" });
+        return;
+      }
+
+      const updateData = user.paymentMethod || [];
+
+      updateData.push({ name, number, cvc, expiry });
+
+      await User.findByIdAndUpdate(id, { paymentMethod: updateData });
+
+      res.status(200).json({
+        message: "Método de pagamento adicionado com sucesso!",
+      });
+    } catch (err) {
+      res.status(500).json({ message: err });
+      return;
+    }
+  }
 };
