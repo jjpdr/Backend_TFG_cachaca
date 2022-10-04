@@ -51,8 +51,6 @@ module.exports = class ProductController {
       image: filename,
     });
 
-    console.log(product);
-
     try {
       const newProduct = await product.save();
       res.status(201).json({
@@ -162,14 +160,17 @@ module.exports = class ProductController {
 
   static async updateProduct(req, res) {
     const id = req.params.id;
-    const name = req.body.name;
-    const brand = req.body.brand;
-    const category = req.body.category;
-    const description = req.body.description;
-    const manufacturer = req.body.manufacturer;
-    const info = req.body.info;
-    const price = req.body.price;
-    const available = req.body.available;
+    const { filename } = req.file;
+    const {
+      name,
+      brand,
+      category,
+      description,
+      manufacturer,
+      info,
+      price,
+      quantity,
+    } = req.body;
 
     const updateData = {};
 
@@ -177,19 +178,11 @@ module.exports = class ProductController {
     const product = await Product.findOne({ _id: id });
 
     if (!product) {
-      res.status(404).json({ message: "Produto não encontrada!" });
+      res.status(404).json({ message: "Produto não encontrado!" });
       return;
     }
 
     const token = getToken(req);
-    const user = await getUserByToken(token);
-
-    if (product.user._id.toString() !== user._id.toString() && !user.isAdmin) {
-      res.status(401).json({
-        message: "Você não possui permissões para atualizar esse produto!",
-      });
-      return;
-    }
 
     if (validateProduct(product)) {
       updateData.name = name;
@@ -199,12 +192,16 @@ module.exports = class ProductController {
       updateData.manufacturer = manufacturer;
       updateData.info = info;
       updateData.price = price;
+      updateData.quantity = quantity;
+      if (filename) updateData.image = filename;
+
       await Product.findByIdAndUpdate(id, updateData);
 
       res.status(200).json({
         product,
         message: "Produto atualizado com sucesso!",
       });
+
       return;
     }
 

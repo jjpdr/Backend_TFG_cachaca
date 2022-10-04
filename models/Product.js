@@ -36,7 +36,6 @@ const product = mongoose.model(
         type: Number,
         required: true,
       },
-      user: Object,
     },
     { timestamps: true }
   )
