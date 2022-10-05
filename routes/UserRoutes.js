@@ -17,5 +17,6 @@ router.patch(
   UserController.editUser
 );
 router.post("/payment-method/:id", UserController.addPaymentMethod);
+router.post("/address/:id", UserController.addAddress);
 
 module.exports = router;

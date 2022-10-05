@@ -14,199 +14,241 @@ const { imageUpload } = require("../helpers/image-upload");
 const validateUser = require("../helpers/validateUser");
 
 module.exports = class UserController {
-  static async register(req, res) {
-    const name = req.body.name;
-    const email = req.body.email;
-    const cpf = req.body.cpf;
-    const birthday = req.body.birthday;
-    const password = req.body.password;
-    const isAdmin = req.body.isAdmin;
-    const image = req.body.image;
+    static async register(req, res) {
+        const name = req.body.name;
+        const email = req.body.email;
+        const cpf = req.body.cpf;
+        const birthday = req.body.birthday;
+        const password = req.body.password;
+        const isAdmin = req.body.isAdmin;
+        const image = req.body.image;
 
-    const userExists = await User.findOne({ email: email });
+        const userExists = await User.findOne({ email: email });
 
-    if (userExists) {
-      res.status(422).json({
-        message: "Por favor, utilize outro e-mail!",
-      });
-      return;
+        if (userExists) {
+            res.status(422).json({
+                message: "Por favor, utilize outro e-mail!",
+            });
+            return;
+        }
+
+        const salt = await bcrypt.genSalt(12);
+        const passwordHash = await bcrypt.hash(password, salt);
+
+        const user = new User({
+            name: name,
+            email: email,
+            cpf: cpf,
+            birthday: birthday,
+            password: passwordHash,
+            isAdmin: isAdmin,
+            image: image,
+        });
+
+        if (!validateUser(user)) {
+            res.status(422).json({
+                message: "Preencha todos os campos marcados com *!",
+            });
+            return;
+        }
+
+        try {
+            const newUser = await user.save();
+            await createUserToken(newUser, req, res);
+        } catch (error) {
+            res.status(500).json({
+                message: "erro",
+            });
+            return;
+        }
     }
 
-    const salt = await bcrypt.genSalt(12);
-    const passwordHash = await bcrypt.hash(password, salt);
+    static async login(req, res) {
+        const email = req.body.email;
+        const password = req.body.password;
 
-    const user = new User({
-      name: name,
-      email: email,
-      cpf: cpf,
-      birthday: birthday,
-      password: passwordHash,
-      isAdmin: isAdmin,
-      image: image,
-    });
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            res.status(422).json({
+                message: "Usuário ou senha inválidos!",
+            });
+            return;
+        }
+        const checkPassword = await bcrypt.compare(password, user.password);
 
-    if (!validateUser(user)) {
-      res.status(422).json({
-        message: "Preencha todos os campos marcados com *!",
-      });
-      return;
+        if (!checkPassword) {
+            res.status(422).json({
+                message: "Usuário ou senha inválidos!",
+            });
+            return;
+        }
+
+        await createUserToken(user, req, res);
     }
 
-    try {
-      const newUser = await user.save();
-      await createUserToken(newUser, req, res);
-    } catch (error) {
-      res.status(500).json({
-        message: "erro",
-      });
-      return;
-    }
-  }
+    static async checkUser(req, res) {
+        let currentUser;
 
-  static async login(req, res) {
-    const email = req.body.email;
-    const password = req.body.password;
+        if (req.headers.authorization) {
+            const token = getToken(req);
+            const decoded = jwt.verify(token, "nossosecret");
 
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      res.status(422).json({
-        message: "Usuário ou senha inválidos!",
-      });
-      return;
-    }
-    const checkPassword = await bcrypt.compare(password, user.password);
+            currentUser = await User.findById(decoded.id);
 
-    if (!checkPassword) {
-      res.status(422).json({
-        message: "Usuário ou senha inválidos!",
-      });
-      return;
+            currentUser.password = undefined;
+        } else {
+            res.status(400).send({ erro: "não autorizado" });
+        }
+
+        res.status(200).send(currentUser);
     }
 
-    await createUserToken(user, req, res);
-  }
+    static async getUserById(req, res) {
+        const id = req.params.id;
 
-  static async checkUser(req, res) {
-    let currentUser;
+        const user = await User.findById(id).select("-password");
 
-    if (req.headers.authorization) {
-      const token = getToken(req);
-      const decoded = jwt.verify(token, "nossosecret");
+        if (!user) {
+            res.status(404).json({
+                message: "Usuário não encontrado!",
+            });
+            return;
+        }
 
-      currentUser = await User.findById(decoded.id);
-
-      currentUser.password = undefined;
-    } else {
-      res.status(400).send({ erro: "não autorizado" });
+        res.status(200).json({ user });
     }
 
-    res.status(200).send(currentUser);
-  }
+    static async getUserByEmail(req, res) {
+        const email = req.params.email;
 
-  static async getUserById(req, res) {
-    const id = req.params.id;
+        const user = await User.findOne({ email }).select("-password");
 
-    const user = await User.findById(id).select("-password");
+        if (!user) {
+            res.status(404).json({
+                message: "Usuário não encontrado!",
+            });
+            return;
+        }
 
-    if (!user) {
-      res.status(404).json({
-        message: "Usuário não encontrado!",
-      });
-      return;
+        await createUserToken(user, req, res);
     }
 
-    res.status(200).json({ user });
-  }
+    static async editUser(req, res) {
+        const id = req.params.id;
 
-  static async getUserByEmail(req, res) {
-    const email = req.params.email;
+        //check if user exists
+        const user = await User.findById(id);
 
-    const user = await User.findOne({ email }).select("-password");
+        const { name, email, cpf, birthday } = req.body;
 
-    if (!user) {
-      res.status(404).json({
-        message: "Usuário não encontrado!",
-      });
-      return;
+        if (req.file) {
+            user.image = req.file.filename;
+        }
+
+        //validations
+
+        // check if email has already taken
+        const userExists = await User.findOne({ email: email });
+
+        if (user.email !== email && userExists) {
+            res.status(422).json({
+                message: "Por favor, utilize outro e-mail!",
+            });
+            cl;
+            return;
+        }
+
+        user.name = name;
+
+        user.email = email;
+
+        user.cpf = cpf;
+
+        user.birthday = birthday;
+
+        try {
+            //returns user updated data
+            await User.findOneAndUpdate(
+                { _id: user._id },
+                { $set: user },
+                { new: true }
+            );
+            res.status(200).json({
+                message: "Usuário atualizado com sucesso",
+            });
+        } catch (err) {
+            res.status(500).json({ message: err });
+            return;
+        }
     }
 
-    await createUserToken(user, req, res);
-  }
+    static async addPaymentMethod(req, res) {
+        try {
+            const id = req.params.id;
 
-  static async editUser(req, res) {
-    const id = req.params.id;
+            const { name, number, cvc, expiry } = req.body;
 
-    //check if user exists
-    const user = await User.findById(id);
+            const user = await User.findOne({ _id: id });
 
-    const { name, email, cpf, birthday } = req.body;
+            if (!user) {
+                res.status(404).json({ message: "Usuário não encontrado!" });
+                return;
+            }
 
-    if (req.file) {
-      user.image = req.file.filename;
+            const updateData = user.paymentMethod || [];
+
+            updateData.push({ name, number, cvc, expiry });
+
+            await User.findByIdAndUpdate(id, { paymentMethod: updateData });
+
+            res.status(200).json({
+                message: "Método de pagamento adicionado com sucesso!",
+            });
+        } catch (err) {
+            res.status(500).json({ message: err });
+            return;
+        }
     }
 
-    //validations
+    static async addAddress(req, res) {
+        try {
+            const id = req.params.id;
+            const {
+                street,
+                number,
+                borough,
+                city,
+                zipCode,
+                state,
+                country,
+                phone,
+            } = req.body;
 
-    // check if email has already taken
-    const userExists = await User.findOne({ email: email });
+            const user = await User.findOne({ _id: id });
 
-    if (user.email !== email && userExists) {
-      res.status(422).json({
-        message: "Por favor, utilize outro e-mail!",
-      });
-      cl;
-      return;
+            if (!user) {
+                res.status(404).json({ message: "Usuário não encontrado!" });
+                return;
+            }
+
+            const updateData = {
+                street,
+                number,
+                borough,
+                city,
+                zipCode,
+                state,
+                country,
+                phone,
+            };
+
+            await User.findByIdAndUpdate(id, { address: updateData });
+            res.status(200).json({
+                message: "Informações de contato atualizadas com sucesso!",
+            });
+        } catch (err) {
+            res.status(500).json({ message: err });
+            return;
+        }
     }
-
-    user.name = name;
-
-    user.email = email;
-
-    user.cpf = cpf;
-
-    user.birthday = birthday;
-
-    try {
-      //returns user updated data
-      await User.findOneAndUpdate(
-        { _id: user._id },
-        { $set: user },
-        { new: true }
-      );
-      res.status(200).json({
-        message: "Usuário atualizado com sucesso",
-      });
-    } catch (err) {
-      res.status(500).json({ message: err });
-      return;
-    }
-  }
-
-  static async addPaymentMethod(req, res) {
-    try {
-      const id = req.params.id;
-
-      const { name, number, cvc, expiry } = req.body;
-
-      const user = await User.findOne({ _id: id });
-
-      if (!user) {
-        res.status(404).json({ message: "Usuário não encontrado!" });
-        return;
-      }
-
-      const updateData = user.paymentMethod || [];
-
-      updateData.push({ name, number, cvc, expiry });
-
-      await User.findByIdAndUpdate(id, { paymentMethod: updateData });
-
-      res.status(200).json({
-        message: "Método de pagamento adicionado com sucesso!",
-      });
-    } catch (err) {
-      res.status(500).json({ message: err });
-      return;
-    }
-  }
 };

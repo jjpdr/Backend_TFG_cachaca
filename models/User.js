@@ -38,12 +38,14 @@ const User = mongoose.model(
         default: "FREE",
       },
       address: {
-        street: String,
-        city: String,
-        country: String,
         phone: String,
+        street: String,
+        number: String,
+        borough: String,
+        city: String,
         zipCode: String,
         state: String,
+        country: String,
       },
       paymentMethod: [
         {
