@@ -251,4 +251,38 @@ module.exports = class UserController {
             return;
         }
     }
+
+    static async deletePaymentMethodByID(req, res) {
+        try {
+            const id = req.params.id;
+
+            const { paymentID } = req.body;
+
+            const user = await User.findOne({ _id: id });
+
+            if (!user) {
+                res.status(404).json({ message: "Usuário não encontrado!" });
+                return;
+            }
+
+            const updateData = user.paymentMethod || [];
+
+            updateData.forEach((payment) => {
+                if (payment._id.toString() === paymentID) {
+                    updateData.splice(updateData.indexOf(payment), 1);
+                }
+                
+            });
+
+            await User.findByIdAndUpdate(id, {
+                paymentMethod: updateData,
+            });
+            res.status(200).json({
+                message: "Método de pagamento removido com sucesso!",
+            });
+        } catch (err) {
+            res.status(500).json({ message: err });
+            return;
+        }
+    }
 };
