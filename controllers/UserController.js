@@ -271,7 +271,6 @@ module.exports = class UserController {
                 if (payment._id.toString() === paymentID) {
                     updateData.splice(updateData.indexOf(payment), 1);
                 }
-                
             });
 
             await User.findByIdAndUpdate(id, {
@@ -284,5 +283,60 @@ module.exports = class UserController {
             res.status(500).json({ message: err });
             return;
         }
+    }
+
+    static async getAll(req, res) {
+        try {
+            const users = await User.find();
+            res.status(200).json({
+                users,
+            });
+        } catch (err) {
+            res.status(500).json({ message: err });
+            return;
+        }
+    }
+
+    static async updateUser(req, res) {
+        const id = req.params.id;
+        const { name, email, cpf, birthday, plan } = req.body;
+
+        console.log(req.body);
+
+        const updateData = {};
+
+        // check if product exists
+        const user = await User.findOne({ _id: id });
+
+        if (!user) {
+            res.status(404).json({ message: "Produto não encontrado!" });
+            return;
+        }
+
+        const token = getToken(req);
+
+        if (validateUser(user)) {
+            updateData.name = name;
+            updateData.email = email;
+            updateData.cpf = cpf;
+            updateData.birthday = birthday;
+            updateData.plan = plan;
+
+            await User.findByIdAndUpdate(id, {
+                name: updateData.name,
+                email: updateData.email,
+                cpf: updateData.cpf,
+                birthday: updateData.birthday,
+                plan: updateData.plan,
+            });
+
+            res.status(200).json({
+                message: "Usuário atualizado com sucesso!",
+            });
+
+            return;
+        }
+
+        res.status();
     }
 };

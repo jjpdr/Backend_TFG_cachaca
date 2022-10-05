@@ -5,6 +5,7 @@ const { imageUpload } = require("../helpers/image-upload");
 // middleware
 const verifyToken = require("../helpers/verify-token");
 
+router.get("/", UserController.getAll);
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/checkuser", UserController.checkUser);
@@ -16,6 +17,7 @@ router.patch(
     imageUpload.single("image"),
     UserController.editUser
 );
+router.put("/:id", verifyToken, UserController.updateUser);
 router.post("/payment-method/:id", UserController.addPaymentMethod);
 router.put("/payment-method/:id", UserController.deletePaymentMethodByID);
 router.post("/address/:id", UserController.addAddress);
