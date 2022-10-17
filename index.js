@@ -17,8 +17,10 @@ app.use(express.static("public"));
 
 const UserRoutes = require("./routes/UserRoutes");
 const ProductRoutes = require("./routes/ProductRoutes");
+const CheckoutRoutes = require("./routes/CheckoutRoutes");
 
 app.use("/users", UserRoutes);
 app.use("/products", ProductRoutes);
+app.use("/checkout", CheckoutRoutes);
 
 app.listen(5000);

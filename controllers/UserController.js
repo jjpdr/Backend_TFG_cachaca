@@ -334,13 +334,14 @@ module.exports = class UserController {
   }
 
   static async checkoutSession(req, res) {
-    const { line_items } = req.body;
+    const { line_items, shipping_cost } = req.body;
     try {
       const session = await stripe.checkout.sessions.create({
         line_items,
         mode: "payment",
         success_url: "https://example.com/success",
         cancel_url: "http://localhost:3000/shopping-cart",
+        shipping_options: [{ shipping_rate: shipping_cost }],
       });
       res.status(200).json({ url: session.url });
     } catch (error) {
