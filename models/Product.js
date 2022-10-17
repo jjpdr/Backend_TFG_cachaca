@@ -36,6 +36,9 @@ const product = mongoose.model(
         type: Number,
         required: true,
       },
+      stripePriceID: {
+        type: String,
+      },
     },
     { timestamps: true }
   )

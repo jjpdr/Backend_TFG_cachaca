@@ -1,6 +1,8 @@
 const Product = require("../models/Product");
 const path = require("path");
 
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 //helpers
 const getToken = require("../helpers/get-token");
 const getUserByToken = require("../helpers/get-user-by-token");
@@ -37,21 +39,33 @@ module.exports = class ProductController {
         .json({ message: "Nome, preço, quantidade ou marca faltando" });
       return;
     }
-
-    //create a product
-    const product = new Product({
-      name,
-      brand,
-      category,
-      description,
-      manufacturer,
-      info,
-      price,
-      quantity,
-      image: filename,
-    });
-
     try {
+      //create stripe product
+      const stripeProduct = await stripe.products.create({
+        name,
+        description,
+      });
+
+      const stripePrice = await stripe.prices.create({
+        unit_amount: price * 100,
+        currency: "brl",
+        product: stripeProduct.id,
+      });
+
+      //create a product
+      const product = new Product({
+        name,
+        brand,
+        category,
+        description,
+        manufacturer,
+        info,
+        price,
+        quantity,
+        image: filename,
+        stripePriceID: stripePrice.id,
+      });
+
       const newProduct = await product.save();
       res.status(201).json({
         message: "Produto cadastrado com sucesso!",
@@ -59,7 +73,9 @@ module.exports = class ProductController {
       });
       return;
     } catch (error) {
-      res.status(500).json({ message: "Não foi possível criar o produto" });
+      res
+        .status(500)
+        .json({ message: "Não foi possível criar o produto", error });
       return;
     }
   }

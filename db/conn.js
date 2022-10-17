@@ -1,10 +1,10 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 async function main() {
-  await mongoose.connect('mongodb://127.0.0.1:27017/getacachacaref')
-  console.log('Conectou com Mongoose!')
+  await mongoose.connect("mongodb://127.0.0.1:27017/getacachacaref");
+  console.log("Conectou com Mongoose!");
 }
 
-main().catch((err) => console.log(err))
+main().catch((err) => console.log(err));
 
-module.exports = mongoose
+module.exports = mongoose;

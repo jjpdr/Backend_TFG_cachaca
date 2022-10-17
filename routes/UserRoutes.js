@@ -12,14 +12,16 @@ router.get("/checkuser", UserController.checkUser);
 router.get("/:id", UserController.getUserById);
 router.get("/email/:email", UserController.getUserByEmail);
 router.patch(
-    "/edit/:id",
-    verifyToken,
-    imageUpload.single("image"),
-    UserController.editUser
+  "/edit/:id",
+  verifyToken,
+  imageUpload.single("image"),
+  UserController.editUser
 );
 router.put("/:id", verifyToken, UserController.updateUser);
 router.post("/payment-method/:id", UserController.addPaymentMethod);
 router.put("/payment-method/:id", UserController.deletePaymentMethodByID);
 router.post("/address/:id", UserController.addAddress);
+
+router.post("/create-checkout-session", UserController.checkoutSession);
 
 module.exports = router;
