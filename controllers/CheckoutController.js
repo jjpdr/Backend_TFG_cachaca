@@ -11,4 +11,18 @@ module.exports = class CheckoutController {
       res.status(400).json({ error });
     }
   }
+
+  static async getCheckoutItems(req, res) {
+    const sessionID = req.params.id;
+    console.log(sessionID);
+    try {
+      const products = await stripe.checkout.sessions.listLineItems(
+        String(sessionID)
+      );
+      console.log(products);
+      res.status(200).json({ products: products.data });
+    } catch (error) {
+      res.status(400).json({ error });
+    }
+  }
 };

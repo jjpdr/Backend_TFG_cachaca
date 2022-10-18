@@ -339,7 +339,8 @@ module.exports = class UserController {
       const session = await stripe.checkout.sessions.create({
         line_items,
         mode: "payment",
-        success_url: "https://example.com/success",
+        success_url:
+          "http://localhost:3000/checkout/payment-success?session_id={CHECKOUT_SESSION_ID}",
         cancel_url: "http://localhost:3000/shopping-cart",
         shipping_options: [{ shipping_rate: shipping_cost }],
       });
