@@ -22,6 +22,4 @@ router.post("/payment-method/:id", UserController.addPaymentMethod);
 router.put("/payment-method/:id", UserController.deletePaymentMethodByID);
 router.post("/address/:id", UserController.addAddress);
 
-router.post("/create-checkout-session", UserController.checkoutSession);
-
 module.exports = router;
