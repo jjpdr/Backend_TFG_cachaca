@@ -7,5 +7,9 @@ router.post(
   "/product-checkout-session",
   CheckoutController.paymentCheckoutSession
 );
+router.post(
+    "/plan-checkout-session",
+    CheckoutController.planCheckoutSession
+  );
 
 module.exports = router;
