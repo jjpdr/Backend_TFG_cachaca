@@ -1,6 +1,4 @@
-const stripe = require("stripe")(
-  "sk_test_51LrVO8JQSrJ9pyRJdyxFUYf5gVhvosbtY6oNaDk0x1OK4Dhm8krmuLdwPZL8o1xqt8gEMRndHTQrz8vvwV3mXQ8D00C0cSrSTb"
-);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 module.exports = class PlanController {
   static async getAllPlans(req, res) {
