@@ -53,7 +53,7 @@ module.exports = class CheckoutController {
         mode: "subscription",
         success_url:
           "http://localhost:3000/checkout/purchase-success?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url: "http://localhost:3000/shopping-cart",
+        cancel_url: "http://localhost:3000/",
       });
       res.status(200).json({ url: session.url });
     } catch (error) {
