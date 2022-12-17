@@ -368,7 +368,6 @@ module.exports = class UserController {
         const { id } = req.body;
         const { filename } = req.file;
 
-        console.log(id, filename);
         try {
             await User.findByIdAndUpdate(id, { image: filename });
             res.status(200).json({ message: "Deu certo" });

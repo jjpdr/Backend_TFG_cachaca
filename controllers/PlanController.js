@@ -12,10 +12,13 @@ module.exports = class PlanController {
     };
     let plans = [];
     try {
-      const stripePrices = await stripe.prices.list({});
-      const stripeProducts = await stripe.products.list({});
+      const stripePrices = await stripe.prices.list({
+        type: "recurring",
+        limit: 100,
+      });
+      const stripeProducts = await stripe.products.list({ limit: 100 });
       stripePrices.data.map((item) => {
-        if (item.type === "recurring" && stripeProducts.data) {
+        if (stripeProducts.data.length > 0) {
           const product = stripeProducts.data.find(
             (product) => product.id === item.product
           );
