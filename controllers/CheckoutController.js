@@ -1,4 +1,5 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const User = require("../models/User");
 
 module.exports = class CheckoutController {
   static async getAllShippingRates(req, res) {
@@ -35,12 +36,12 @@ module.exports = class CheckoutController {
       });
       res.status(200).json({ url: session.url });
     } catch (error) {
-      res.status(400).json({ error });
+      res.status(400).json({ error: "Falha" });
     }
   }
 
   static async planCheckoutSession(req, res) {
-    const { price } = req.body;
+    const { price, userID } = req.body;
     try {
       const session = await stripe.checkout.sessions.create({
         billing_address_collection: "auto",
@@ -55,9 +56,13 @@ module.exports = class CheckoutController {
           "http://localhost:3000/checkout/purchase-success?session_id={CHECKOUT_SESSION_ID}",
         cancel_url: "http://localhost:3000/",
       });
+
+      await User.findByIdAndUpdate(userID, {
+        planID: price,
+      });
       res.status(200).json({ url: session.url });
     } catch (error) {
-      res.status(400).json({ error });
+      res.status(400).json({ error: "Falha" });
     }
   }
 };

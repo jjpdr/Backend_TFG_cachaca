@@ -35,7 +35,19 @@ module.exports = class PlanController {
       });
       res.status(200).json({ plans: plans });
     } catch (error) {
-      res.status(400).json({ error });
+      res.status(400).json({ error: "erro" });
+    }
+  }
+
+  static async getPlanById(req, res) {
+    const id = req.params.id; //priceID
+    try {
+      const price = await stripe.prices.retrieve(id); //retrieving all prices
+      const plan = await stripe.products.retrieve(price.product);
+
+      res.status(200).json({ plan: plan });
+    } catch {
+      res.status(400).json({ error: "erro" });
     }
   }
 };
